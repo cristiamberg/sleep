@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente de Sono Profundo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos personalizados para a animação de respiração e layout */
+        body {
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overscroll-behavior-y: none; /* Previne o 'bounce' no mobile */
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7); /* Slate 800 com opacidade */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Círculo de Respiração */
+        .breathe-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99,102,241,0.8) 0%, rgba(79,70,229,0.2) 70%, transparent 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+            margin: 0 auto;
+        }
+
+        /* Classes controladas via JS para a respiração */
+        .inhale {
+            transform: scale(1.6);
+            transition: transform 4s linear;
+        }
+        .hold {
+            transform: scale(1.6);
+            transition: transform 7s linear;
+        }
+        .exhale {
+            transform: scale(1);
+            transition: transform 8s linear;
+        }
+
+        /* Custom Slider (Range) */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #818cf8;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(129, 140, 248, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 2px;
+        }
+        
+        .active-btn {
+            background-color: #4f46e5; /* Indigo 600 */
+            color: white;
+            border-color: #4f46e5;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Cabeçalho -->
+    <header class="text-center mb-8">
+        <h1 class="text-3xl font-light tracking-wide text-indigo-300 flex items-center justify-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            Sono Profundo
+        </h1>
+        <p class="text-slate-400 mt-2 text-sm">Relaxe sua mente e prepare-se para dormir</p>
+    </header>
+
+    <main class="w-full max-w-md space-y-6 pb-12">
+        
+        <!-- Seção 1: Respiração 4-7-8 -->
+        <section class="glass-panel rounded-3xl p-6 text-center">
+            <h2 class="text-lg font-medium text-slate-300 mb-6 flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+                Respiração 4-7-8
+            </h2>
+            
+            <div class="h-48 flex items-center justify-center mb-4 relative cursor-pointer" id="breathe-container" onclick="toggleBreathing()">
+                <div id="breathe-circle" class="breathe-circle">
+                    <span id="breathe-text" class="text-lg font-medium text-white pointer-events-none drop-shadow-md">Toque<br>para Iniciar</span>
+                </div>
+            </div>
+            <p class="text-xs text-slate-500">Ajuda a reduzir a ansiedade e induzir o sono profundo.</p>
+        </section>
+
+        <!-- Seção 2: Sons Relaxantes -->
+        <section class="glass-panel rounded-3xl p-6">
+            <h2 class="text-lg font-medium text-slate-300 mb-4 flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M8 5v14"/><path d="M16 5v14"/><path d="M4 9v6"/><path d="M20 9v6"/></svg>
+                Sons Relaxantes
+            </h2>
+            
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <!-- Ruído Marrom -->
+                <button onclick="toggleSound('brown')" id="btn-brown" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-700 bg-slate-800/50 hover:bg-slate-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-2"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg>
+                    <span class="text-xs">Oceano<br>(Marrom)</span>
+                </button>
+                
+                <!-- Ruído Rosa -->
+                <button onclick="toggleSound('pink')" id="btn-pink" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-700 bg-slate-800/50 hover:bg-slate-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <span class="text-xs">Chuva<br>(Rosa)</span>
+                </button>
+                
+                <!-- Ruído Branco -->
+                <button onclick="toggleSound('white')" id="btn-white" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-700 bg-slate-800/50 hover:bg-slate-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-2"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span class="text-xs">Vento<br>(Branco)</span>
+                </button>
+            </div>
+
+            <!-- Controle de Volume -->
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" oninput="changeVolume(this.value)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            </div>
+        </section>
+
+        <!-- Seção 3: Timer -->
+        <section class="glass-panel rounded-3xl p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-medium text-slate-300 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Temporizador
+                </h2>
+                <span id="timer-display" class="text-indigo-400 font-mono font-bold text-lg hidden">00:00</span>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-2">
+                <button onclick="setTimer(15)" id="btn-timer-15" class="timer-btn py-2 rounded-xl border border-slate-700 bg-slate-800/50 hover:bg-slate-700 transition-colors text-sm">15m</button>
+                <button onclick="setTimer(30)" id="btn-timer-30" class="timer-btn py-2 rounded-xl border border-slate-700 bg-slate-800/50 hover:bg-slate-700 transition-colors text-sm">30m</button>
+                <button onclick="setTimer(60)" id="btn-timer-60" class="timer-btn py-2 rounded-xl border border-slate-700 bg-slate-800/50 hover:bg-slate-700 transition-colors text-sm">1h</button>
+                <button onclick="stopTimer()" id="btn-timer-off" class="timer-btn py-2 rounded-xl border border-rose-900/50 bg-slate-800/50 hover:bg-rose-900/30 text-rose-400 transition-colors text-sm">Desligar</button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        /* =========================================
+           1. LÓGICA DE RESPIRAÇÃO (4-7-8)
+           ========================================= */
+        const breatheCircle = document.getElementById('breathe-circle');
+        const breatheText = document.getElementById('breathe-text');
+        let breathingInterval;
+        let isBreathing = false;
+        let breathePhaseTimeout1, breathePhaseTimeout2;
+
+        function toggleBreathing() {
+            if (isBreathing) {
+                stopBreathing();
+            } else {
+                startBreathing();
+            }
+        }
+
+        function startBreathing() {
+            isBreathing = true;
+            breatheSequence(); // Executa a primeira vez imediatamente
+            // O ciclo total do 4-7-8 é 4 + 7 + 8 = 19 segundos
+            breathingInterval = setInterval(breatheSequence, 19000);
+        }
+
+        function stopBreathing() {
+            isBreathing = false;
+            clearInterval(breathingInterval);
+            clearTimeout(breathePhaseTimeout1);
+            clearTimeout(breathePhaseTimeout2);
+            
+            // Resetar UI
+            breatheCircle.className = 'breathe-circle';
+            breatheText.innerHTML = "Toque<br>para Iniciar";
+        }
+
+        function breatheSequence() {
+            if (!isBreathing) return;
+
+            // Fase 1: Inspirar (4 segundos)
+            breatheText.innerHTML = "Inspire...<br><span class='text-sm opacity-70'>4s</span>";
+            breatheCircle.className = 'breathe-circle inhale';
+
+            // Fase 2: Segurar (7 segundos)
+            breathePhaseTimeout1 = setTimeout(() => {
+                if (!isBreathing) return;
+                breatheText.innerHTML = "Segure...<br><span class='text-sm opacity-70'>7s</span>";
+                breatheCircle.className = 'breathe-circle hold';
+            }, 4000);
+
+            // Fase 3: Expirar (8 segundos)
+            breathePhaseTimeout2 = setTimeout(() => {
+                if (!isBreathing) return;
+                breatheText.innerHTML = "Expire...<br><span class='text-sm opacity-70'>8s</span>";
+                breatheCircle.className = 'breathe-circle exhale';
+            }, 11000); // 4 + 7 = 11s
+        }
+
+        /* =========================================
+           2. LÓGICA DE ÁUDIO (Web Audio API)
+           Geração procedural de sons para não depender de MP3s externos.
+           ========================================= */
+        let audioCtx;
+        let noiseSource;
+        let gainNode;
+        let currentNoiseType = null;
+        let masterVolume = 0.5;
+
+        // Inicializa o contexto de áudio (requer interação do usuário)
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                gainNode = audioCtx.createGain();
+                gainNode.connect(audioCtx.destination);
+                gainNode.gain.value = masterVolume;
+            }
+            if(audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Função principal para ligar/desligar sons
+        function toggleSound(type) {
+            initAudio();
+
+            // Desativar botões visualmente
+            ['brown', 'pink', 'white'].forEach(t => {
+                document.getElementById(`btn-${t}`).classList.remove('active-btn');
+            });
+
+            // Se clicar no som que já está tocando, ele para.
+            if (currentNoiseType === type) {
+                stopSound();
+                return;
+            }
+
+            // Parar som atual antes de começar outro
+            stopSoundSync();
+            
+            currentNoiseType = type;
+            document.getElementById(`btn-${type}`).classList.add('active-btn');
+            
+            // Gerar o buffer de ruído
+            const bufferSize = audioCtx.sampleRate * 2; // 2 segundos de buffer
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            
+            // Variáveis para filtros
+            let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+
+            for (let i = 0; i < bufferSize; i++) {
+                let white = Math.random() * 2 - 1;
+
+                if (type === 'brown') {
+                    // Simula Oceano / Ruído Marrom (Rumble profundo)
+                    b0 = (lastOut + (0.02 * white)) / 1.02;
+                    output[i] = b0 * 3.5;
+                    lastOut = b0;
+                } 
+                else if (type === 'pink') {
+                    // Simula Chuva / Ruído Rosa (Paul Kellet's method)
+                    b0 = 0.99886 * b0 + white * 0.0555179;
+                    b1 = 0.99332 * b1 + white * 0.0750759;
+                    b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856;
+                    b4 = 0.55000 * b4 + white * 0.5329522;
+                    b5 = -0.7616 * b5 - white * 0.0168980;
+                    output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+                    b6 = white * 0.115926;
+                } 
+                else if (type === 'white') {
+                    // Simula Vento/Ventilador / Ruído Branco
+                    output[i] = white * 0.2; // Volume reduzido pois branco é muito agudo
+                }
+            }
+
+            noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = noiseBuffer;
+            noiseSource.loop = true;
+
+            // Adicionar um filtro Lowpass suave para tornar os sons mais agradáveis para dormir
+            let filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            if(type === 'brown') filter.frequency.value = 400; // Bem abafado
+            if(type === 'pink') filter.frequency.value = 1200; // Lembra chuva
+            if(type === 'white') filter.frequency.value = 3000; // Ventilador suave
+            
+            noiseSource.connect(filter);
+            filter.connect(gainNode);
+            
+            // Fade In suave para não assustar
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(masterVolume, audioCtx.currentTime + 1);
+            
+            noiseSource.start(0);
+        }
+
+        let lastOut = 0; // Utilizado no ruído marrom
+
+        function stopSoundSync() {
+            if (noiseSource) {
+                try { noiseSource.stop(); } catch(e) {}
+                noiseSource.disconnect();
+                noiseSource = null;
+            }
+        }
+
+        function stopSound() {
+            if(!audioCtx || !noiseSource) return;
+            currentNoiseType = null;
+            
+            // Remover destaque dos botões
+            ['brown', 'pink', 'white'].forEach(t => {
+                document.getElementById(`btn-${t}`).classList.remove('active-btn');
+            });
+
+            // Fade Out suave
+            gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
+            setTimeout(() => {
+                stopSoundSync();
+            }, 1000);
+        }
+
+        function changeVolume(value) {
+            masterVolume = parseFloat(value);
+            if (gainNode && audioCtx) {
+                // Previne cliques de áudio alterando o valor suavemente
+                gainNode.gain.setTargetAtTime(masterVolume, audioCtx.currentTime, 0.1);
+            }
+        }
+
+        /* =========================================
+           3. LÓGICA DO TEMPORIZADOR (Timer)
+           ========================================= */
+        let sleepTimer;
+        let timerSeconds = 0;
+        let timerInterval;
+
+        function setTimer(minutes) {
+            stopTimer(); // Limpa timer anterior
+
+            // Atualiza botões
+            document.querySelectorAll('.timer-btn').forEach(btn => btn.classList.remove('active-btn', 'border-indigo-500'));
+            document.getElementById(`btn-timer-${minutes}`).classList.add('border-indigo-500', 'bg-indigo-600/30');
+
+            timerSeconds = minutes * 60;
+            updateTimerDisplay();
+            
+            document.getElementById('timer-display').classList.remove('hidden');
+
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerDisplay();
+
+                // Faltando 1 minuto, começa a diminuir o volume gradualmente (se estiver tocando algo)
+                if(timerSeconds === 60 && noiseSource && gainNode) {
+                    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 60);
+                }
+
+                if (timerSeconds <= 0) {
+                    executeTimerAction();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById('timer-display');
+            const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const s = (timerSeconds % 60).toString().padStart(2, '0');
+            display.innerText = `${m}:${s}`;
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-display').classList.add('hidden');
+            document.querySelectorAll('.timer-btn').forEach(btn => btn.classList.remove('active-btn', 'border-indigo-500', 'bg-indigo-600/30'));
+            
+            // Restaura o volume original se tiver sido abaixado
+            if(gainNode && audioCtx && currentNoiseType) {
+                gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(masterVolume, audioCtx.currentTime);
+            }
+        }
+
+        function executeTimerAction() {
+            stopTimer();
+            stopBreathing();
+            stopSound(); // Função de parar som já faz o fade-out final e zera a UI
+        }
+
+    </script>
+</body>
+</html>
