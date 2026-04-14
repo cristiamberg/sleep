@@ -1,20 +1,43 @@
 {
   "name": "Assistente de Sono Profundo",
-  "short_name": "Sono",
+  "short_name": "Sono Profundo",
+  "description": "Aplicativo para ajudar no relaxamento e induzir o sono profundo através de respiração e sons relaxantes",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
+  "categories": ["health", "lifestyle", "productivity"],
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Iniciar Respiração",
+      "short_name": "Respirar",
+      "description": "Começar exercício de respiração 4-7-8",
+      "url": "./?action=breathe",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Sons Relaxantes",
+      "short_name": "Sons",
+      "description": "Abrir sons para dormir",
+      "url": "./?action=sounds",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
