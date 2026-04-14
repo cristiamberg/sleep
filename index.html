@@ -3,32 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <!-- Meta tags otimizadas para comportamento de App Nativa -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Assistente de Sono Profundo</title>
     
     <!-- Meta tags obrigatórias para validação de PWA -->
     <meta name="description" content="Aplicativo para ajudar no relaxamento e induzir o sono profundo através de respiração e sons.">
     <meta name="theme-color" content="#0f172a">
-    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Moon_symbol_crescent.svg/512px-Moon_symbol_crescent.svg.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sono Profundo">
+    <link rel="apple-touch-icon" href="./icon-192.png">
     
-    <!-- LIGAÇÕES PARA A PWA (Caminhos estritos adicionados: ./) -->
+    <!-- LIGAÇÕES PARA A PWA -->
     <link rel="manifest" href="./manifest.json">
+    
     <script>
         // Registo do Service Worker com caminho relativo explícito
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                try {
-                    navigator.serviceWorker.register('./sw.js')
-                        .then(registration => {
-                            console.log('Service Worker registado com sucesso no âmbito:', registration.scope);
-                        })
-                        .catch(err => {
-                            console.warn('Falha ao registar o Service Worker:', err);
+                navigator.serviceWorker.register('./sw.js', { scope: './' })
+                    .then(registration => {
+                        console.log('✅ Service Worker registado com sucesso no âmbito:', registration.scope);
+                        
+                        // Força atualização do SW quando detectar nova versão
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('🔄 Novo Service Worker encontrado:', newWorker);
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('📦 Nova versão disponível! Recarregue para atualizar.');
+                                    // Opcional: mostrar notificação para usuário atualizar
+                                }
+                            });
                         });
-                } catch (e) {
-                    console.warn('O ambiente bloqueou o registo do Service Worker.', e);
-                }
+                    })
+                    .catch(err => {
+                        console.error('❌ Falha ao registar o Service Worker:', err);
+                    });
             });
+            
+            // Comunicação com o SW para controle de cache
+            navigator.serviceWorker.ready.then(registration => {
+                console.log('🎯 Service Worker pronto para uso!');
+            });
+        } else {
+            console.warn('⚠️ Service Worker não suportado neste navegador');
         }
     </script>
 
@@ -93,6 +112,16 @@
             background-color: #4f46e5;
             color: white;
             border-color: #4f46e5;
+        }
+        
+        /* Melhorias para PWA standalone */
+        @media (display-mode: standalone) {
+            body {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-left: env(safe-area-inset-left);
+                padding-right: env(safe-area-inset-right);
+            }
         }
     </style>
 </head>
