@@ -2,20 +2,31 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta tags otimizadas para comportamento de App Nativa -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Assistente de Sono Profundo</title>
+    
+    <!-- Meta tags obrigatórias para o PWABuilder validar a PWA com sucesso -->
+    <meta name="description" content="Aplicativo para ajudar no relaxamento e induzir o sono profundo através de respiração e sons.">
+    <meta name="theme-color" content="#0f172a">
     
     <!-- LIGAÇÕES PARA A PWA -->
     <link rel="manifest" href="manifest.json">
     <script>
+        // Registo do Service Worker à prova de erros (evita problemas no PWABuilder e em pré-visualizações)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-                    navigator.serviceWorker.register('./sw.js').catch(err => {
-                        console.log('O registo do Service Worker falhou:', err);
-                    });
-                } else {
-                    console.log('Service Worker não suportado neste ambiente.');
+                try {
+                    // Tenta registar o ficheiro sw.js
+                    navigator.serviceWorker.register('sw.js')
+                        .then(registration => {
+                            console.log('Service Worker registado com sucesso no âmbito:', registration.scope);
+                        })
+                        .catch(err => {
+                            console.warn('Aviso: Falha ao registar o Service Worker (isto é normal em pré-visualizações locais):', err);
+                        });
+                } catch (e) {
+                    console.warn('O ambiente bloqueou o registo do Service Worker.', e);
                 }
             });
         }
